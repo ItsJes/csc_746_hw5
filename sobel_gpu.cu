@@ -63,8 +63,30 @@ sobel_filtered_pixel(float *s, int i, int j , int ncols, int nrows, float *gx, f
 
    // ADD CODE HERE:  add your code here for computing the sobel stencil computation at location (i,j)
    // of input s, returning a float
+    float gradX = gx[0] * s[(i * ncols + j) - ncols - 1] +
+                   gx[1] * s[(i * ncols + j) - ncols] +
+                   gx[2] * s[(i * ncols + j) - (ncols + 1)] +
+                   gx[3] * s[(i * ncols + j) - 1] +
+                   gx[4] * s[(i * ncols + j)] +
+                   gx[5] * s[(i * ncols + j) + 1] +
+                   gx[6] * s[(i * ncols + j) + ncols - 1] +
+                   gx[7] * s[(i * ncols + j) + ncols] +
+                   gx[8] * s[(i * ncols + j) + ncols + 1];
 
-   return t;
+     float gradY = gy[0] * s[(i * ncols + j) - ncols - 1] +
+                   gy[1] * s[(i * ncols + j) - ncols] +
+                   gy[2] * s[(i * ncols + j) - ncols + 1] +
+                   gy[3] * s[(i * ncols + j) - 1] +
+                   gy[4] * s[(i * ncols + j)] +
+                   gy[5] * s[(i * ncols + j) + 1] +
+                   gy[6] * s[(i * ncols + j) + ncols - 1] +
+                   gy[7] * s[(i * ncols + j) + ncols] +
+                   gy[8] * s[(i * ncols + j) + ncols + 1];
+
+     float gradXsquared = gradX * gradX;
+     float gradYsquared = gradY * gradY;
+
+     return sqrt(gradXsquared + gradYsquared);
 }
 
 //
