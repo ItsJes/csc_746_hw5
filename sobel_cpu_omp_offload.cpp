@@ -51,8 +51,30 @@ sobel_filtered_pixel(float *s, int i, int j , int ncols, int nrows, float *gx, f
 
    // ADD CODE HERE: add your code here for computing the sobel stencil computation at location (i,j)
    // of input s, returning a float
-
-   return t;
+    float gradX = gx[0] * s[(i * ncols + j) - ncols - 1] +
+                   gx[1] * s[(i * ncols + j) - ncols] +
+                   gx[2] * s[(i * ncols + j) - (ncols + 1)] +
+                   gx[3] * s[(i * ncols + j) - 1] +
+                   gx[4] * s[(i * ncols + j)] +
+                   gx[5] * s[(i * ncols + j) + 1] +
+                   gx[6] * s[(i * ncols + j) + ncols - 1] +
+                   gx[7] * s[(i * ncols + j) + ncols] +
+                   gx[8] * s[(i * ncols + j) + ncols + 1];
+  
+     float gradY = gy[0] * s[(i * ncols + j) - ncols - 1] +
+                   gy[1] * s[(i * ncols + j) - ncols] +
+                   gy[2] * s[(i * ncols + j) - ncols + 1] +
+                   gy[3] * s[(i * ncols + j) - 1] +
+                   gy[4] * s[(i * ncols + j)] +
+                   gy[5] * s[(i * ncols + j) + 1] +
+                   gy[6] * s[(i * ncols + j) + ncols - 1] +
+                   gy[7] * s[(i * ncols + j) + ncols] +
+                   gy[8] * s[(i * ncols + j) + ncols + 1];
+  
+     float gradXsquared = gradX * gradX;
+     float gradYsquared = gradY * gradY;
+  
+     return sqrt(gradXsquared + gradYsquared);
 }
 
 //
@@ -90,7 +112,18 @@ do_sobel_filtering(float *in, float *out, int ncols, int nrows)
 
    // ADD CODE HERE: insert your code here that iterates over every (i,j) of input,  makes a call
    // to sobel_filtered_pixel, and assigns the resulting value at location (i,j) in the output.
-   
+       
+    for(int i = 0; i < nvals; i++){
+       out[i] = 0.0;
+    }
+
+   #pragma omp target teams distribution parallel for collapse(2)
+   for(int i = 1; i < nrows - 1; i++){
+      for(int j = 1; j < ncols - 1; j++){
+         out[j + i * ncols] = sobel_filtered_pixel(in, i, j, ncols, nrows, Gx, Gy);
+      }
+   }
+	   
    // don't forget to include a  #pragma omp target teams parallel for around those loop(s).
    // You may also wish to consider additional clauses that might be appropriate here to increase parallelism 
    // if you are using nested loops.

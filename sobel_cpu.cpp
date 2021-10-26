@@ -97,19 +97,15 @@ do_sobel_filtering(float *in, float *out, int ncols, int nrows)
    // to sobel_filtered_pixel, and assigns the resulting value at location (i,j) in the output.
    float size = nrows * ncols;
  
-    #pragma omp parallel for
+   
     for(int i = 0; i < size; i++){
        out[i] = 0.0;
     }
  
-   #pragma omp barrier
- 
-   int lenR = nrows - 1;
-   int lenC = ncols - 1;
- 
-   for(int i = 1; i < lenR; i++){
-      for(int j = 1; j < lenC; j++){
-         out[j + i * ncols] = sobel_filtered_pixel(in, i, j, nrows, ncols, Gx, Gy);
+   #pragma omp parallel for collapse(2)
+   for(int i = 1; i < nrows - 1; i++){
+      for(int j = 1; j < ncols - 1; j++){
+         out[j + i * ncols] = sobel_filtered_pixel(in, i, j, ncols, nrows, Gx, Gy);
       } 
    }
 }
