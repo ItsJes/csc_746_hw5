@@ -59,11 +59,13 @@ __device__ float
 sobel_filtered_pixel(float *s, int i, int j , int ncols, int nrows, float *gx, float *gy)
 {
 
-   float t=0.0;
+   float gradX = 0.0;
+   float gradY = 0.0;
 
    // ADD CODE HERE:  add your code here for computing the sobel stencil computation at location (i,j)
    // of input s, returning a float
-    float gradX = gx[0] * s[(i * ncols + j) - ncols - 1] +
+  if ((i > 0 && i < nrows -1) && (j > 0 && j < ncols -1)){ 
+   float gradX = gradX +  gx[0] * s[(i * ncols + j) - ncols - 1] +
                    gx[1] * s[(i * ncols + j) - ncols] +
                    gx[2] * s[(i * ncols + j) - (ncols + 1)] +
                    gx[3] * s[(i * ncols + j) - 1] +
@@ -73,7 +75,7 @@ sobel_filtered_pixel(float *s, int i, int j , int ncols, int nrows, float *gx, f
                    gx[7] * s[(i * ncols + j) + ncols] +
                    gx[8] * s[(i * ncols + j) + ncols + 1];
 
-     float gradY = gy[0] * s[(i * ncols + j) - ncols - 1] +
+     float gradY = gradY + gy[0] * s[(i * ncols + j) - ncols - 1] +
                    gy[1] * s[(i * ncols + j) - ncols] +
                    gy[2] * s[(i * ncols + j) - ncols + 1] +
                    gy[3] * s[(i * ncols + j) - 1] +
@@ -82,6 +84,7 @@ sobel_filtered_pixel(float *s, int i, int j , int ncols, int nrows, float *gx, f
                    gy[6] * s[(i * ncols + j) + ncols - 1] +
                    gy[7] * s[(i * ncols + j) + ncols] +
                    gy[8] * s[(i * ncols + j) + ncols + 1];
+  }
 
      float gradXsquared = gradX * gradX;
      float gradYsquared = gradY * gradY;
@@ -118,14 +121,14 @@ sobel_kernel_gpu(float *s,  // source image pixels
    // because this is CUDA, you need to use CUDA built-in variables to compute an index and stride
    // your processing motif will be very similar here to that we used for vector add in Lab #2
    
-   int dim = blockDim.x * gridDim.x;
-   int index = blockIdx.x * blockDim.x + threadIdx.x;
+      int dim = blockDim.x * gridDim.x;
+      int index = blockIdx.x * blockDim.x + threadIdx.x;
 
    for (int i = index; i < n; i += dim){
-      int x = i / ncols;
-      int y = i % ncols;
+      int row = i / ncols;
+      int col = i % ncols;
 
-      d[i] = sobel_filtered_pixel(s, x, y, ncols, nrows, gx, gy);
+      d[i] = sobel_filtered_pixel(s, row, col, ncols, nrows, gx, gy);
      
    }
 }
